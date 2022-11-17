@@ -1,0 +1,25 @@
+{
+  "host": "localhost",
+  "port": 8080,
+  "readTimeoutSec": 15,
+  "writeTimeoutSec": 15,
+  "loggerCfg": {
+    "level": "debug",
+    "encoding": "json",
+    "outputPaths": ["stdout", "/tmp/logs/url_shortener_server"],
+    "errorOutputPaths": ["stderr"],
+    "initialFields": {"foo": "bar"},
+    "encoderConfig": {
+      "messageKey": "message",
+      "levelKey": "level",
+      "levelEncoder": "lowercase"
+    }
+  },
+  "storageCfg": {
+    "storageType": 0,
+    "urlSize": 6,
+    "maxKeyGenAttempts": 1e4,
+    "shortenTimeoutSec": 10,
+    "expandTimeoutSec":  10
+  }
+}

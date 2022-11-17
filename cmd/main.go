@@ -1,43 +1,69 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
+	"flag"
 	"log"
-	"sync"
-	"urlshortener/internal/server"
-	"urlshortener/internal/urlstorage"
+	"os"
+	"os/signal"
+	"urlshortener/internal/shortener_server"
 )
 
+// TODO: add load balancer
+
+var cfgPath string
+
+func init() {
+	const (
+		defaultCfgPath = ""
+		usage          = "config path"
+	)
+	flag.StringVar(&cfgPath, "config", defaultCfgPath, usage)
+	flag.StringVar(&cfgPath, "c", defaultCfgPath, usage+" (shorthand)")
+}
+
+func getCfg(path string) (result shortener_server.Config, _ error) {
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return shortener_server.Config{}, err
+	}
+	err = json.Unmarshal(raw, &result)
+	if err != nil {
+		return shortener_server.Config{}, err
+	}
+	return result, nil
+}
+
 func main() {
-	dbServer, err := server.NewServer(server.Config{
-		Host: "localhost",
-		Port: 8080,
-		StorageCfg: urlstorage.Config{
-			StorageType:       urlstorage.RuntimeStorage,
-			UrlSize:           6,
-			MaxKeyGenAttempts: 1e4,
-			ShortenTimeoutSec: 10,
-			ExpandTimeoutSec:  10,
-			DBCfg: &urlstorage.DBStorageConfig{
-				Host:     "localhost",
-				Port:     5432,
-				Username: "",
-				Password: "",
-				Database: "",
-			},
-		},
-	})
+	flag.Parse()
+	if len(cfgPath) == 0 {
+		log.Fatal("config path isn't provided")
+	}
+	cfg, err := getCfg(cfgPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
+	server, err := shortener_server.NewServer(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	idleConnsClosed := make(chan struct{})
 	go func() {
-		defer wg.Done()
-		err := dbServer.Run()
-		if err != nil {
-			log.Fatal(err)
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt)
+		<-sigint
+
+		if err := server.Shutdown(context.Background()); err != nil {
+			log.Printf("HTTP server Shutdown: %v", err)
 		}
+		close(idleConnsClosed)
 	}()
-	wg.Wait()
+
+	if err := server.Run(); err != nil {
+		log.Fatal(err)
+	}
+	<-idleConnsClosed
 }

@@ -11,11 +11,11 @@ import (
 // TODO: implement with caching
 
 type DBStorageConfig struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
-	Database string
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Database string `json:"database"`
 }
 
 type DBStorage struct {

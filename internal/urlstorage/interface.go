@@ -7,21 +7,21 @@ import (
 
 // TODO: add logger
 
-type StorageType bool
+type StorageType uint8
 
 const (
-	RuntimeStorage  StorageType = false
-	DatabaseStorage StorageType = true
+	RuntimeStorage  StorageType = 0
+	DatabaseStorage StorageType = 1
 )
 
 type Config struct {
-	StorageType       StorageType
-	UrlSize           int
-	MaxKeyGenAttempts int
-	ShortenTimeoutSec int
-	ExpandTimeoutSec  int
+	StorageType       StorageType `json:"storageType"`
+	UrlSize           int         `json:"urlSize"`
+	MaxKeyGenAttempts int         `json:"maxKeyGenAttempts"`
+	ShortenTimeoutSec int         `json:"shortenTimeoutSec"`
+	ExpandTimeoutSec  int         `json:"expandTimeoutSec"`
 
-	DBCfg *DBStorageConfig
+	DBCfg *DBStorageConfig `json:"DBCfg"`
 }
 
 type Storage interface {
