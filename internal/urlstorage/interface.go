@@ -5,8 +5,6 @@ import (
 	"fmt"
 )
 
-// TODO: add logger
-
 type StorageType uint8
 
 const (

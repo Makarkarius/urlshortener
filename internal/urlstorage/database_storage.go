@@ -9,6 +9,7 @@ import (
 
 // TODO: implement with sharding
 // TODO: implement with caching
+// TODO: add db logger
 
 type DBStorageConfig struct {
 	Host     string `json:"host"`

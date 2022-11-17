@@ -11,6 +11,7 @@ import (
 )
 
 // TODO: add load balancer
+// TODO: add containerization
 
 var cfgPath string
 
